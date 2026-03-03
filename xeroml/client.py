@@ -24,7 +24,11 @@ class XeroML:
     def _request(self, method: str, path: str, **kwargs: object) -> httpx.Response:
         res = self._http.request(method, path, **kwargs)
         if not res.is_success:
-            raise_for_status(res.status_code, res.json())
+            try:
+                body = res.json()
+            except Exception:
+                body = {"error": {"message": res.text or res.reason_phrase or "Request failed"}}
+            raise_for_status(res.status_code, body)
         return res
 
     def parse(self, message: str, provider: str | None = None) -> IntentGraph:
