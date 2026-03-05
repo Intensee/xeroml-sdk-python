@@ -31,21 +31,24 @@ class Session:
         data = res.json()
         return IntentGraph(**data.get("graph", data))
 
-    def update(self, response: str, role: str = "assistant") -> None:
+    def update(self, message: str, role: str = "assistant") -> None:
         self._request(
             "POST",
             f"/v1/sessions/{self.session_id}/update",
-            json={"message": response, "role": role},
+            json={"message": message, "role": role},
         )
 
     def check_drift(self) -> DriftReport:
         res = self._request("GET", f"/v1/sessions/{self.session_id}/drift")
         return DriftReport(**res.json())
 
-    def get_graph(self) -> IntentGraph:
+    def get_graph(self) -> IntentGraph | None:
         res = self._request("GET", f"/v1/sessions/{self.session_id}/graph")
         data = res.json()
-        return IntentGraph(**data.get("graph", data))
+        graph_data = data.get("graph")
+        if graph_data is None:
+            return None
+        return IntentGraph(**graph_data)
 
     def get_history(self) -> SessionHistoryResponse:
         res = self._request("GET", f"/v1/sessions/{self.session_id}/history")
@@ -73,21 +76,24 @@ class AsyncSession:
         data = res.json()
         return IntentGraph(**data.get("graph", data))
 
-    async def update(self, response: str, role: str = "assistant") -> None:
+    async def update(self, message: str, role: str = "assistant") -> None:
         await self._request(
             "POST",
             f"/v1/sessions/{self.session_id}/update",
-            json={"message": response, "role": role},
+            json={"message": message, "role": role},
         )
 
     async def check_drift(self) -> DriftReport:
         res = await self._request("GET", f"/v1/sessions/{self.session_id}/drift")
         return DriftReport(**res.json())
 
-    async def get_graph(self) -> IntentGraph:
+    async def get_graph(self) -> IntentGraph | None:
         res = await self._request("GET", f"/v1/sessions/{self.session_id}/graph")
         data = res.json()
-        return IntentGraph(**data.get("graph", data))
+        graph_data = data.get("graph")
+        if graph_data is None:
+            return None
+        return IntentGraph(**graph_data)
 
     async def get_history(self) -> SessionHistoryResponse:
         res = await self._request("GET", f"/v1/sessions/{self.session_id}/history")
